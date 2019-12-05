@@ -55,8 +55,8 @@ export default function App() {
     })
     .catch((err) => console.error(err));
   };
-  useEffect(() => {
-    fetch(`${API_ENDPOINT}/chats`)
+  useEffect(() => { // ComponentDidMount 시 채팅 목록을 보여줌
+    fetch(`${API_ENDPOINT}/chats?order=desc`)
       .then((res) => res.json())
       .then((messages) => {
         console.log(messages[messages.length - 1]);
