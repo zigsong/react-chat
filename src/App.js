@@ -7,6 +7,7 @@ import React, { useState, useEffect } from 'react';
 const API_ENDPOINT = 'https://snu-web-random-chat.herokuapp.com';
 class ChatMessage {
   constructor(userName, message, createdAt) {
+    // this.userId = userId;
     this.message = message;
     this.userName = userName;
     const rawTime = new Date(createdAt);
@@ -16,20 +17,31 @@ class ChatMessage {
     this.createdAt = `${hour}:${minute}:${second}` 
   }
 
+  // const myKey = localStorage.getItem('__key')
   print() { 
-    // if (localStorage.getItem('__key') == { myKey }) {
-    //   return console.log('myKey')
-    // }
+    if (this.userName === localStorage.getItem('username')) {
+      return (
+        <div style={{ border: '1px solid red' }}>
+          <span style={{ marginRight: '5px', fontWeight: 'bold' }}>{this.userName}</span>
+          <span>
+            {this.message}
+          </span>
+          <span style={{ float: 'right' }}>{this.createdAt}</span>
+      </div>  
+      )
+    }
     {
-    return (
-      <div style={{ border: '1px solid black' }}>
-        <span style={{ marginRight: '5px', fontWeight: 'bold' }}>{this.userName}</span>
-        <span>
-          {this.message}
-        </span>
-        <span style={{ float: 'right' }}>{this.createdAt}</span>
+      return (
+        <div style={{ border: '1px solid black' }}>
+          <span style={{ marginRight: '5px', fontWeight: 'bold' }}>{this.userName}</span>
+          <span>
+            {this.message}
+            {localStorage.getItem('__id')}
+          </span>
+          <span style={{ float: 'right' }}>{this.createdAt}</span>
         </div>
-    )}
+      )
+    }
   }
 }
 
@@ -44,6 +56,7 @@ export default function App() {
     if (!name) {
       return alert('input your name');
     }
+    localStorage.setItem('username', name);
     setLoginStatus(true)
     fetch(`${API_ENDPOINT}/login`, { // 로그인 // 기본 형식: fetch(url, options)
       method: 'POST',
@@ -54,11 +67,14 @@ export default function App() {
       body: `name=${name}`,
     })
     .then((response) => response.json()) // fetch는 response 객체에 json을 호출하여 json 객체를 반환
-    .then(({ key }) => {
-      console.log(key);
+    .then(({ key }) => { // 파라미터에 _id
+      console.log(key); // 파라미터에 _id
       if (key) {
         localStorage.setItem('__key', key); // setItem(key, value);
       }
+      // if (_id) {
+      //   localStorage.setItem('__id', _id)
+      // }
     })
     .catch((err) => console.error(err));
   };
@@ -66,8 +82,7 @@ export default function App() {
     fetch(`${API_ENDPOINT}/chats?order=desc`)
       .then((res) => res.json())
       .then((messages) => { 
-        // console.log(messages[messages.length - 1]); // 마지막 메시지 콘솔창에 출력
-        // const reversedList = messages.reverse()
+        console.log(messages[messages.length - 1]); // 마지막 메시지 콘솔창에 출력
         setMessageList(
           messages.sort(function(a,b) 
           { return a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0 }).map((message) => new ChatMessage(message.userName, message.message, message.createdAt))
@@ -89,9 +104,6 @@ export default function App() {
     .then((response) => response.json()) // fetch는 response 객체에 json을 호출하여 json 객체를 반환
     .then((body) => {
       console.log(body);
-      // if (key) {
-      //   localStorage.setItem('__key', key); // setItem(key, value);
-      // }
     })
     .catch((err) => console.error(err));
     
@@ -103,30 +115,7 @@ export default function App() {
         { return a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0 }).map((message) => new ChatMessage(message.userName, message.message, message.createdAt))
       );
     });
-
   }
-
-  // async getNewChat() {
-  //   await getNewChat();
-  // }
-
-  // const getNewChat = () => {
-  //   fetch(`${API_ENDPOINT}/chats?order=desc`, {
-  //     method: 'GET',
-  //     headers: {
-  //       'Content-Type': 'application/x-www-form-urlencoded', 
-  //       'Authorization': `Key ${localStorage.getItem('__key')}`,
-  //     }, 
-  //     body: `message=${chatText}`,
-  //   }) // 방금 보낸 채팅 바로 출력 
-  //   .then((res) => res.json())
-  //   .then((messages) => {
-  //     console.log(messages[messages.length - 1]); // 마지막 메시지 콘솔창에 출력
-  //     setMessageList(
-  //     messages.map((message) => new ChatMessage(message.name, message.message, message.createdAt)),
-  //     );
-  //   });
-  // }
 
   if ( !loginStatus ) {
     if ( showLoginForm ) { // 1. 아직 로그인 안 한 상태, 로그인 버튼 
@@ -139,8 +128,7 @@ export default function App() {
           </div>
         </div>
       ) 
-    } else { // 2. 로그인 버튼 누른 후 로그인 폼 등장 QQ. 여기 login input의 value로 들어온 id는 어떻게 fetch로 보내지?
-      // 여기서만 reverse map이 먹히는 이유?
+    } else { // 2. 로그인 버튼 누른 후 로그인 폼 등장
         return (
           <div>
             Chat Program.
@@ -170,19 +158,3 @@ export default function App() {
         )
       }
     }
-
-// 이런 코드도! 
-// let button = null;
-//     if (isLoggedIn) {
-//       button = <LogoutButton onClick={this.handleLogoutClick} />;
-//     } else {
-//       button = <LoginButton onClick={this.handleLoginClick} />;
-//     }
- 
-//     return (
-//       <div>
-//         <Greeting isLoggedIn={isLoggedIn} />
-//         {button}
-//       </div>
-//     );
-// 출처: https://blog.sonim1.com/180 [Kendrick's Blog]
