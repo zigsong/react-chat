@@ -19,7 +19,7 @@ class ChatMessage {
 
   // const myKey = localStorage.getItem('__key')
   print() { 
-    if (this.userName === localStorage.getItem('username')) {
+    if (this.userName === localStorage.getItem('username')) { // key나 id로 하면 좋을텐데 userName으로 임시방편
       return (
         <div style={{ border: '1px solid red' }}>
           <span style={{ marginRight: '5px', fontWeight: 'bold' }}>{this.userName}</span>
@@ -78,8 +78,9 @@ export default function App() {
     })
     .catch((err) => console.error(err));
   };
-  useEffect(() => { // 채팅 가져오기(ComponentDidMount 시 채팅 목록을 보여줌)
-    fetch(`${API_ENDPOINT}/chats?order=desc`)
+  useEffect(() => {
+    const interval = setInterval(() => {
+      fetch(`${API_ENDPOINT}/chats?order=desc`)
       .then((res) => res.json())
       .then((messages) => { 
         console.log(messages[messages.length - 1]); // 마지막 메시지 콘솔창에 출력
@@ -88,7 +89,9 @@ export default function App() {
           { return a.createdAt < b.createdAt ? -1 : a.createdAt > b.createdAt ? 1 : 0 }).map((message) => new ChatMessage(message.userName, message.message, message.createdAt))
         );
       });
-  }, []);
+      }, 3000);
+      return () => clearInterval(interval);    
+    }, []);
 
   // useEffect 에서 설정한 함수가 컴포넌트가 화면에 가장 처음 렌더링될 때만 실행되고 업데이트 할 경우에는 실행 할 필요가 없는 경우엔 함수의 두번째 파라미터로 비어있는 배열을 넣어줌
   const sendChat = async (e) => {
