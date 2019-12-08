@@ -1,13 +1,12 @@
 // eslint-disable-next-line no-unused-vars
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Fragment } from 'react';
 // import $ from "jquery";
 // import jQuery from "jquery";
 import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-import Modal from '@material-ui/core/Modal';
-import Backdrop from '@material-ui/core/Backdrop';
-import Fade from '@material-ui/core/Fade';
+import Grid from '@material-ui/core/Grid';
+// import AccountCircle from '@material-ui/icons/AccountCircle';
 // import Icon from '@material-ui/core/Icon';
 // import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 // import { send } from 'q';
@@ -33,9 +32,9 @@ class ChatMessage {
         <div>
           <span style={{ marginRight: '5px', color: "white", fontWeight: 'bold', backgroundColor: "orange", borderRadius: "5px"}}>{this.userName}</span>
           <div style={{ border: '1px solid orange', textAlign: 'right', margin: "5px", padding: "2px", borderRadius: "5px", display: "inline-block"}}>
-            <span>
+            <pre>
               {this.message}
-            </span> 
+            </pre> 
           </div>  
           <span style={{ color: "grey" }}>{this.createdAt}</span>
         </div>
@@ -46,9 +45,9 @@ class ChatMessage {
         <div>
           <span style={{ marginRight: '5px', fontWeight: 'bold' }}>{this.userName}</span>
           <div style={{ border: '1px solid black', textAlign: 'left', margin: "5px", padding: "2px", borderRadius: "5px", display: "inline-block"}}> 
-            <span>
+            <pre>
               {this.message}
-            </span>
+            </pre>
           </div>
           <span style={{ color: "grey" }}>{this.createdAt}</span>
         </div>
@@ -67,16 +66,8 @@ const useStyles = makeStyles(theme => ({
   button: {
     margin: theme.spacing(1),
   },
-  modal: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  paper: {
-    backgroundColor: theme.palette.background.paper,
-    border: '2px solid #000',
-    boxShadow: theme.shadows[5],
-    padding: theme.spacing(2, 4, 3),
+  margin: {
+    margin: theme.spacing(1),
   },
 }));
 
@@ -87,10 +78,6 @@ export default function App() {
   const [messageList, setMessageList] = useState([]);
   const [name, setName] = useState(null);
   const [chatText, setChatText] = useState(null);
-  const [open, setOpen] = React.useState(false);
-  const sendForm = document.getElementById("sendForm");
-  const chatBox = document.getElementById("chatBox");
-  const sendButton = document.getElementById("sendButton");
   
   const onLogin = (e) => {
     e.preventDefault();
@@ -158,36 +145,63 @@ export default function App() {
       );
     });
   }
+  
+  const buttonStyle = {
+    fontSize: "20px",
+    margin: "4px",
+    border: "1px solid blue",
+    borderRadius: "10px"
+  }
 
-    const handleOpen = () => {
-      setOpen(true);
-    };
+  const keyPress = (e) => {         //shift enter or enter control
+    if(e.keyCode === 13)
+    {
+      if(e.shiftKey) {
+        e.preventDefault();
+        e.target.value = e.target.value + "\n";
+        setChatText(e.target.value);
+      }
+      else {
+        e.preventDefault();
+        sendChat(e);
+      }
+    }
+  }
 
-    const handleClose = () => {
-      setOpen(false);
-    };
-    
   if ( !loginStatus ) {
     if ( showLoginForm ) { // 1. 아직 로그인 안 한 상태, 로그인 버튼 
       return (
-        <div>
-          <button onClick={() => setShowLoginForm(false)}>LogIn</button>
+        <Fragment>
+          <div className={classes.root}>
+            <button style={buttonStyle} variant="contained" color="primary" onClick={() => setShowLoginForm(false)}>채팅방 들어가기</button>
+            
+          </div>
           <div className="chatList" style={{ padding: '20px' }}>
             { messageList.map((message) => message.print()) }
           </div>
-        </div>
+        </Fragment>
       ) 
     } else { // 2. 로그인 버튼 누른 후 로그인 폼 등장
         return (
-          <div>
-            <form onSubmit={onLogin}>
-              <input type="text" name="name" placeholder="type your name" onChange={(e) => setName(e.target.value)} />
-              <input type="submit" value="login" />
-            </form>
+          <Fragment>
+            <div className={classes.root}> 
+              {/* <form onSubmit={onLogin}>
+                <input type="text" name="name" placeholder="type your name" onChange={(e) => setName(e.target.value)} />
+                <input variant="contained" color="primary" type="submit" value="login" />
+              </form>          */}
+              <div className={classes.margin}>
+                <Grid container spacing={1} alignItems="flex-end">
+                  <form onSubmit={onLogin}>
+                    <TextField id="input-with-icon-grid" label="type your name" onChange={(e) => setName(e.target.value)} />
+                    <input style={buttonStyle} type="submit" value="login" />
+                  </form>
+                </Grid>
+              </div>
+            </div>
             <div className="chatList" style={{ padding: '20px' }}>
               { messageList.map((message) => message.print()) }
-            </div>            
-          </div>
+            </div>  
+          </Fragment>
         )
       }
     } else { // 3. 로그인된 상태. 로그아웃버튼을 보여줌
@@ -213,7 +227,7 @@ export default function App() {
             } */}
 
             <form className={classes.root} noValidate autoComplete="off" onSubmit={sendChat}>
-                <TextField id="standard-basic" label="type message" onChange={(e) => setChatText(e.target.value)} />
+                <TextField id="standard-basic" label="type message" onChange={(e) => setChatText(e.target.value)} onKeyDown = {(e) => keyPress(e)} />
                 <Button type="submit" variant="contained" color="primary" className={classes.button} >
                  Send
                 </Button>
