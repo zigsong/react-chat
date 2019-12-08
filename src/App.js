@@ -6,12 +6,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-// import AccountCircle from '@material-ui/icons/AccountCircle';
-// import Icon from '@material-ui/core/Icon';
-// import AccountCircleIcon from '@material-ui/icons/AccountCircle';
-// import { send } from 'q';
-
-// window.$ = window.jQuery = jQuery;
 
 const API_ENDPOINT = 'https://snu-web-random-chat.herokuapp.com';
 class ChatMessage {
@@ -27,7 +21,7 @@ class ChatMessage {
   }
 
   print() { 
-    if (this.userName === localStorage.getItem('username')) { // key나 id로 하면 좋을텐데 userName으로 임시방편
+    if (this.userName === localStorage.getItem('username')) { 
       return (
         <div>
           <span style={{ marginRight: '5px', color: "white", fontWeight: 'bold', backgroundColor: "orange", borderRadius: "5px"}}>{this.userName}</span>
@@ -95,8 +89,8 @@ export default function App() {
       body: `name=${name}`,
     })
     .then((response) => response.json()) // fetch는 response 객체에 json을 호출하여 json 객체를 반환
-    .then(({ key }) => { // 파라미터에 _id
-      console.log(key); // 파라미터에 _id
+    .then(({ key }) => {
+      console.log(key); 
       if (key) {
         localStorage.setItem('__key', key); // setItem(key, value);
       }
@@ -153,7 +147,7 @@ export default function App() {
     borderRadius: "10px"
   }
 
-  const keyPress = (e) => {         //shift enter or enter control
+  const keyPress = (e) => {   
     if(e.keyCode === 13)
     {
       if(e.shiftKey) {
@@ -217,14 +211,6 @@ export default function App() {
               <textarea id="chatBox" type="text" name="chat" placeholder="type message" onChange={(e) => setChatText(e.target.value)}/> 
               <input id="sendButton" type="submit" value="send" />
             </form> */}
-
-            {/* { $("#chatBox").keydown(function(e) {
-                if (e.keyCode === 13 && !e.shiftKey) {
-                  $("#sendForm").submit();
-                  e.preventDefault();
-                }
-              })
-            } */}
 
             <form className={classes.root} noValidate autoComplete="off" onSubmit={sendChat}>
                 <TextField id="standard-basic" label="type message" onChange={(e) => setChatText(e.target.value)} onKeyDown = {(e) => keyPress(e)} />
