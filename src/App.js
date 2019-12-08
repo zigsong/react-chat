@@ -1,8 +1,18 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useState, useEffect } from 'react';
-// import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-// import LoginForm from './LoginForm'; 다 해놓고 나눠보자~
-// import Chat from './Chat';
+// import $ from "jquery";
+// import jQuery from "jquery";
+import { makeStyles } from '@material-ui/core/styles';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import Modal from '@material-ui/core/Modal';
+import Backdrop from '@material-ui/core/Backdrop';
+import Fade from '@material-ui/core/Fade';
+// import Icon from '@material-ui/core/Icon';
+// import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+// import { send } from 'q';
+
+// window.$ = window.jQuery = jQuery;
 
 const API_ENDPOINT = 'https://snu-web-random-chat.herokuapp.com';
 class ChatMessage {
@@ -17,40 +27,71 @@ class ChatMessage {
     this.createdAt = `${hour}:${minute}:${second}` 
   }
 
-  // const myKey = localStorage.getItem('__key')
   print() { 
     if (this.userName === localStorage.getItem('username')) { // key나 id로 하면 좋을텐데 userName으로 임시방편
       return (
-        <div style={{ border: '1px solid red' }}>
-          <span style={{ marginRight: '5px', fontWeight: 'bold' }}>{this.userName}</span>
-          <span>
-            {this.message}
-          </span>
-          <span style={{ float: 'right' }}>{this.createdAt}</span>
-      </div>  
+        <div>
+          <span style={{ marginRight: '5px', color: "white", fontWeight: 'bold', backgroundColor: "orange", borderRadius: "5px"}}>{this.userName}</span>
+          <div style={{ border: '1px solid orange', textAlign: 'right', margin: "5px", padding: "2px", borderRadius: "5px", display: "inline-block"}}>
+            <span>
+              {this.message}
+            </span> 
+          </div>  
+          <span style={{ color: "grey" }}>{this.createdAt}</span>
+        </div>
       )
     }
     {
       return (
-        <div style={{ border: '1px solid black' }}>
+        <div>
           <span style={{ marginRight: '5px', fontWeight: 'bold' }}>{this.userName}</span>
-          <span>
-            {this.message}
-            {localStorage.getItem('__id')}
-          </span>
-          <span style={{ float: 'right' }}>{this.createdAt}</span>
+          <div style={{ border: '1px solid black', textAlign: 'left', margin: "5px", padding: "2px", borderRadius: "5px", display: "inline-block"}}> 
+            <span>
+              {this.message}
+            </span>
+          </div>
+          <span style={{ color: "grey" }}>{this.createdAt}</span>
         </div>
       )
     }
   }
 }
 
+const useStyles = makeStyles(theme => ({
+  root: {
+    '& > *': {
+      margin: theme.spacing(1),
+      width: 200,
+    },
+  },
+  button: {
+    margin: theme.spacing(1),
+  },
+  modal: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  paper: {
+    backgroundColor: theme.palette.background.paper,
+    border: '2px solid #000',
+    boxShadow: theme.shadows[5],
+    padding: theme.spacing(2, 4, 3),
+  },
+}));
+
 export default function App() {
+  const classes = useStyles();
   const [showLoginForm, setShowLoginForm] = useState(true); // 첫 렌더링 시 login 상태 = false;
   const [loginStatus, setLoginStatus] = useState(false);
   const [messageList, setMessageList] = useState([]);
   const [name, setName] = useState(null);
   const [chatText, setChatText] = useState(null);
+  const [open, setOpen] = React.useState(false);
+  const sendForm = document.getElementById("sendForm");
+  const chatBox = document.getElementById("chatBox");
+  const sendButton = document.getElementById("sendButton");
+  
   const onLogin = (e) => {
     e.preventDefault();
     if (!name) {
@@ -72,9 +113,6 @@ export default function App() {
       if (key) {
         localStorage.setItem('__key', key); // setItem(key, value);
       }
-      // if (_id) {
-      //   localStorage.setItem('__id', _id)
-      // }
     })
     .catch((err) => console.error(err));
   };
@@ -96,6 +134,7 @@ export default function App() {
   // useEffect 에서 설정한 함수가 컴포넌트가 화면에 가장 처음 렌더링될 때만 실행되고 업데이트 할 경우에는 실행 할 필요가 없는 경우엔 함수의 두번째 파라미터로 비어있는 배열을 넣어줌
   const sendChat = async (e) => {
     e.preventDefault();    
+   
     await fetch(`${API_ENDPOINT}/chats?order=desc`, { // 채팅 보내기
       method: 'POST',
       headers: {
@@ -120,11 +159,18 @@ export default function App() {
     });
   }
 
+    const handleOpen = () => {
+      setOpen(true);
+    };
+
+    const handleClose = () => {
+      setOpen(false);
+    };
+    
   if ( !loginStatus ) {
     if ( showLoginForm ) { // 1. 아직 로그인 안 한 상태, 로그인 버튼 
       return (
         <div>
-          Chat Program.
           <button onClick={() => setShowLoginForm(false)}>LogIn</button>
           <div className="chatList" style={{ padding: '20px' }}>
             { messageList.map((message) => message.print()) }
@@ -134,7 +180,6 @@ export default function App() {
     } else { // 2. 로그인 버튼 누른 후 로그인 폼 등장
         return (
           <div>
-            Chat Program.
             <form onSubmit={onLogin}>
               <input type="text" name="name" placeholder="type your name" onChange={(e) => setName(e.target.value)} />
               <input type="submit" value="login" />
@@ -148,15 +193,32 @@ export default function App() {
     } else { // 3. 로그인된 상태. 로그아웃버튼을 보여줌
         return (
           <div>
-            Chat Program.
+            <span>{name}님, 안녕하세요.</span>
             <button onClick={() => [ setLoginStatus(false), setShowLoginForm(false) ]}>LogOut</button> 
             <div className="chatList" style={{ padding: '20px' }}>
                 {messageList.map((message) => message.print())}
             </div>     
-            <form onSubmit={sendChat}> 
-              <input type="textarea" name="chat" placeholder="type message" onChange={(e) => setChatText(e.target.value)}/> 
-              <input type="submit" value="send" />
+
+            {/* <form id="sendForm" onSubmit={ sendChat }> 
+              <textarea id="chatBox" type="text" name="chat" placeholder="type message" onChange={(e) => setChatText(e.target.value)}/> 
+              <input id="sendButton" type="submit" value="send" />
+            </form> */}
+
+            {/* { $("#chatBox").keydown(function(e) {
+                if (e.keyCode === 13 && !e.shiftKey) {
+                  $("#sendForm").submit();
+                  e.preventDefault();
+                }
+              })
+            } */}
+
+            <form className={classes.root} noValidate autoComplete="off" onSubmit={sendChat}>
+                <TextField id="standard-basic" label="type message" onChange={(e) => setChatText(e.target.value)} />
+                <Button type="submit" variant="contained" color="primary" className={classes.button} >
+                 Send
+                </Button>
             </form>
+
           </div>
         )
       }
