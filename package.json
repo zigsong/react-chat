@@ -40,5 +40,17 @@
     "eslint": "^6.8.0",
     "eslint-plugin-react": "^7.19.0",
     "install-peers": "^1.0.3"
-  }
+  },
+  "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
+  "main": ".eslintrc.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wanderlust16/react-chat.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/wanderlust16/react-chat/issues"
+  },
+  "homepage": "https://github.com/wanderlust16/react-chat#readme"
 }
